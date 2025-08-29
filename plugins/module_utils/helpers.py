@@ -181,3 +181,28 @@ def helper_normalize_data(data, del_keys=None):
             del data[key]
 
     return data, del_keys
+
+def helper_mask_sensitive_data(data: dict, keys: list[str]=["password", "auth"], mask: str="****") -> dict:
+    """
+    Search sensitive data in dict and mask them with desired string.
+
+    Parameters:
+      data: dict to search sensitive keys
+      keys: key names to search 
+      mask: string to mask values
+
+    Returns:
+      dict: with sensitive values masked
+    """
+    if isinstance(data, dict):
+        for k, v in data.items():
+            # Check if the key is sensitive AND the value is a string
+            if k in keys and isinstance(v, str):
+                data[k] = mask
+            # Always recurse if the value is a dictionary or list, regardless of the key name
+            else:
+                helper_mask_sensitive_data(v, keys, mask)
+    elif isinstance(data, list):
+        for i in range(len(data)):
+            helper_mask_sensitive_data(data[i], keys, mask)
+    return data

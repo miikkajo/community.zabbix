@@ -67,7 +67,7 @@ from ansible.errors import AnsibleConnectionFailure
 from ansible.plugins.httpapi import HttpApiBase
 from ansible.module_utils.compat.version import StrictVersion
 from ansible.module_utils.connection import ConnectionError
-
+from ansible_collections.community.zabbix.plugins.module_utils.helpers import helper_mask_sensitive_data
 
 class HttpApi(HttpApiBase):
     auth = None
@@ -181,6 +181,9 @@ class HttpApi(HttpApiBase):
                         raise ConnectionError("Invalid JSON response: %s" % value)
 
                     if "error" in json_data:
+                        data = json.loads(data)
+                        data = helper_mask_sensitive_data(data)
+                        data = json.dumps(data)
                         raise ConnectionError("REST API returned %s when sending %s" % (json_data["error"], data))
 
                     if "result" in json_data:
@@ -195,6 +198,9 @@ class HttpApi(HttpApiBase):
 
                     return response.getcode(), json_data
 
+                data = json.loads(data)
+                data = helper_mask_sensitive_data(data)
+                data = json.dumps(data)
                 raise ConnectionError("REST API returned %s when sending %s" % (json_data["error"], data))
 
             if "result" in json_data:
